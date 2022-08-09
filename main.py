@@ -210,34 +210,34 @@ class player:
             
             self.random_play(game) #plays randomly if there are no chains
 
-random_play_wins = []
-smart_play_wins = []
+# random_play_wins = []
+# smart_play_wins = []
 
-for i in tqdm(range(70)):
+# for i in tqdm(range(70)):
     
-    player1, player2 = player(1), player(2)
-    game = pentago(plot_grid=False)
-    while not game.winner:
-        player1.random_play(game)
-        if not game.winner:
-            player2.smart_play(game)
+#     player1, player2 = player(1), player(2)
+#     game = pentago(plot_grid=False)
+#     while not game.winner:
+#         player1.random_play(game)
+#         if not game.winner:
+#             player2.smart_play(game)
                         
-    if game.winner == 1:
-        random_play_wins.append(1)
-        smart_play_wins.append(0)
-    elif game.winner == 2:
-        random_play_wins.append(0)
-        smart_play_wins.append(1)
-    else:
-        random_play_wins.append(0)
-        smart_play_wins.append(0)
+#     if game.winner == 1:
+#         random_play_wins.append(1)
+#         smart_play_wins.append(0)
+#     elif game.winner == 2:
+#         random_play_wins.append(0)
+#         smart_play_wins.append(1)
+#     else:
+#         random_play_wins.append(0)
+#         smart_play_wins.append(0)
     
         
-random_play_wins = np.array(random_play_wins)
-smart_play_wins = np.array(smart_play_wins)
+# random_play_wins = np.array(random_play_wins)
+# smart_play_wins = np.array(smart_play_wins)
 
-plt.figure(figsize=(10, 5))
-plt.plot(random_play_wins.cumsum())
-plt.plot(smart_play_wins.cumsum())
-plt.legend(['random play', 'smart play'])
-plt.show()
+# plt.figure(figsize=(10, 5))
+# plt.plot(random_play_wins.cumsum())
+# plt.plot(smart_play_wins.cumsum())
+# plt.legend(['random play', 'smart play'])
+# plt.show()
