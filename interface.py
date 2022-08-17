@@ -1,10 +1,5 @@
-import numpy as np
 import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-from board_generation import generate_figure
-from pentago import pentago
-from player import player
 
 
 def check_move_complete(move):
@@ -41,7 +36,12 @@ def generate_layout():
         new_row = []
         for column in range(6):
             new_row.append(
-                sg.Button(size=(2, 1), key=(row, column, 0), button_color="grey")
+                sg.Button(
+                    size=(2, 1),
+                    key=(row, column, 0),
+                    button_color="grey",
+                    disabled_button_color="darkred",
+                )
             )
         marbles.append(new_row)
 
@@ -50,14 +50,16 @@ def generate_layout():
     for row in range(2):
         new_row = []
         for col in range(2):
-            new_row.append(sg.Button(size=(6, 3), key=(col, row, 1), button_color="grey"))
+            new_row.append(
+                sg.Button(size=(6, 3), key=(col, row, 1), button_color="grey")
+            )
         boards.append(new_row)
 
     direction = [
         [sg.Text("Choose a rotation direction")],
         [
-            sg.Button("<--", key=-1, button_color="grey"),
-            sg.Button("-->", key=1, button_color="grey"),
+            sg.Button("⟲", key=-1, button_color="grey", font=("", 40), size=(1, 1)),
+            sg.Button("⟳", key=1, button_color="grey", font=("", 40)),
         ],
     ]
 
@@ -69,10 +71,13 @@ def generate_layout():
     ]
 
     return [
+        [sg.Column([[sg.Canvas(key="board", size=(1, 1))]], justification="center")],
         [
-            sg.Column(marbles, key="-1-STEP-"),
-            sg.Column(boards, key="-2-STEP-"),
-            sg.Column(direction, key="-3-STEP-"),
+            sg.Column(marbles, key="-1-STEP-", justification="center"),
+            sg.Column(boards, key="-2-STEP-", justification="center"),
+            sg.Column(direction, key="-3-STEP-", justification="center"),
         ],
-        [sg.Canvas(key="board"), sg.Column(commands, key="-4-STEP-")],
+        [
+            sg.Column(commands, key="-4-STEP-", justification="right"),
+        ],
     ]

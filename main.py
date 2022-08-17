@@ -1,36 +1,52 @@
 import PySimpleGUI as sg
 
 from interface import generate_layout, draw_figure, reset_move, check_move_complete
-from board_generation import generate_figure
+from board_generation import generate_figure, matrix_conversion
 from pentago import pentago
 from player import player
 
 marbles_selection = [(row, col, 0) for row in range(6) for col in range(6)]
 board_selection = [(row, col, 1) for row in range(2) for col in range(2)]
 
-VARS = {
-    "player1": False,
-    "player2": False,
-    "game": False,
-    "move": False,
-    "window": False,
-    "fig_plt": False,
-    "fig_agg": False,
-}
-
 # Set up the game
-VARS["player1"], VARS["player2"] = player(1), player(2)
-VARS["game"] = pentago(plot_grid=False)
-VARS["move"] = [None, None, None]
-VARS["active_player"] = VARS["player1"]
+def setup_game():
+    VARS = {
+        "player1": False,
+        "player2": False,
+        "game": False,
+        "move": False,
+        "window": False,
+        "fig_plt": False,
+        "fig_agg": False,
+    }
+
+    VARS["player1"], VARS["player2"] = player(1), player(2)
+    VARS["game"] = pentago(plot_grid=False)
+    VARS["move"] = [None, None, None]
+    VARS["active_player"] = VARS["player1"]
+    return VARS
+
 
 # Set up interface values
-layout = generate_layout()
-VARS["window"] = sg.Window("Pentago", layout, finalize=True, resizable=True)
-VARS["fig_plt"] = generate_figure(VARS["game"].table)
-VARS["fig_agg"] = draw_figure(VARS["window"]["board"].TKCanvas, VARS["fig_plt"])
+def setup_interface(VARS):
+    layout = generate_layout()
+    VARS["window"] = sg.Window("Pentago", layout, finalize=True, resizable=True)
+    VARS["fig_plt"] = generate_figure(VARS["game"].table)
+    VARS["fig_agg"] = draw_figure(VARS["window"]["board"].TKCanvas, VARS["fig_plt"])
+    return VARS
 
 
+def disable_marbles_buttons(window, matrix):
+    table = matrix_conversion(matrix)
+    for i in range(6):
+        for j in range(6):
+            if table[i, j] != 0:
+                window[(i, j, 0)](disabled=True)
+            else:
+                window[(i, j, 0)](disabled=False)
+
+
+VARS = setup_interface(setup_game())
 # Create an event loop
 while True:
     event, values = VARS["window"].read()
@@ -65,6 +81,7 @@ while True:
 
     if event == "Play the move":
         VARS["game"].play(VARS["active_player"], *VARS["move"])
+        VARS["window"][(*VARS["move"][0], 0)](disabled=True)
         VARS["fig_agg"].get_tk_widget().forget()
         VARS["fig_plt"] = generate_figure(VARS["game"].table)
         VARS["fig_agg"] = draw_figure(VARS["window"]["board"].TKCanvas, VARS["fig_plt"])
@@ -75,8 +92,13 @@ while True:
         )
         VARS["move"], VARS["window"] = reset_move(VARS["move"], VARS["window"])
         VARS["game"].check_winner()
+        disable_marbles_buttons(VARS["window"], VARS["game"].table)
         if VARS["game"].winner:
             winner = VARS["game"].winner
+            VARS = setup_interface(setup_game())
+            import ipdb
+
+            ipdb.set_trace()
             sg.Popup(f"Player {winner} has won")
 
 VARS["window"].close()
@@ -85,14 +107,14 @@ VARS["window"].close()
 # smart_play_wins = []
 
 # for i in tqdm(range(70)):
-    
+
 #     player1, player2 = player(1), player(2)
 #     game = pentago(plot_grid=False)
 #     while not game.winner:
 #         player1.random_play(game)
 #         if not game.winner:
 #             player2.smart_play(game)
-                        
+
 #     if game.winner == 1:
 #         random_play_wins.append(1)
 #         smart_play_wins.append(0)
@@ -102,8 +124,8 @@ VARS["window"].close()
 #     else:
 #         random_play_wins.append(0)
 #         smart_play_wins.append(0)
-    
-        
+
+
 # random_play_wins = np.array(random_play_wins)
 # smart_play_wins = np.array(smart_play_wins)
 

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
 
 
 def matrix_conversion(matrix):
@@ -45,7 +44,7 @@ def conversion_to_coordinates(matrix):
 def generate_figure(matrix):
     X0, Y0, X1, Y1, X2, Y2 = conversion_to_coordinates(matrix)
     fig = plt.figure(figsize=(6, 6))
-    fig.set_size_inches(3, 3)
+    fig.set_size_inches(2, 2)
     fig.set_facecolor("darkred")
 
     ax = fig.add_subplot(111)
@@ -56,5 +55,5 @@ def generate_figure(matrix):
     ax.set_axis_off()
     ax.vlines(2.5, 0, 5, colors="black")
     ax.hlines(2.5, 0, 5, colors="black")
-    
+
     return fig
