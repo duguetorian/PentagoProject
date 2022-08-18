@@ -1,136 +1,110 @@
 import PySimpleGUI as sg
+from game_interface import game_interface
 
-from interface import generate_layout, draw_figure, reset_move, check_move_complete
-from board_generation import generate_figure, matrix_conversion
-from pentago import pentago
-from player import player
+sg.theme("black")
 
-marbles_selection = [(row, col, 0) for row in range(6) for col in range(6)]
-board_selection = [(row, col, 1) for row in range(2) for col in range(2)]
+player_type = ["Player", "AI"]
 
-# Set up the game
-def setup_game():
-    VARS = {
-        "player1": False,
-        "player2": False,
-        "game": False,
-        "move": False,
-        "window": False,
-        "fig_plt": False,
-        "fig_agg": False,
-    }
+AI_level = ["Easy", "Hard"]
 
-    VARS["player1"], VARS["player2"] = player(1), player(2)
-    VARS["game"] = pentago(plot_grid=False)
-    VARS["move"] = [None, None, None]
-    VARS["active_player"] = VARS["player1"]
-    return VARS
-
-
-# Set up interface values
-def setup_interface(VARS):
-    layout = generate_layout()
-    VARS["window"] = sg.Window("Pentago", layout, finalize=True, resizable=True)
-    VARS["fig_plt"] = generate_figure(VARS["game"].table)
-    VARS["fig_agg"] = draw_figure(VARS["window"]["board"].TKCanvas, VARS["fig_plt"])
-    return VARS
-
-
-def disable_marbles_buttons(window, matrix):
-    table = matrix_conversion(matrix)
-    for i in range(6):
-        for j in range(6):
-            if table[i, j] != 0:
-                window[(i, j, 0)](disabled=True)
-            else:
-                window[(i, j, 0)](disabled=False)
-
-
-VARS = setup_interface(setup_game())
-# Create an event loop
-while True:
-    event, values = VARS["window"].read()
-
-    # End program if user closes window
-    if event == sg.WIN_CLOSED:
-        break
-
-    if event == "Cancel":
-        VARS["move"], VARS["window"] = reset_move(VARS["move"], VARS["window"])
-
-    if event in marbles_selection:
-        if VARS["move"][0] is not None:
-            VARS["window"][(*VARS["move"][0], 0)](button_color="grey")
-        VARS["move"][0] = event[slice(2)]
-        VARS["window"][event](button_color="blue")
-
-    if event in board_selection:
-        if VARS["move"][1] is not None:
-            VARS["window"][(*VARS["move"][1], 1)](button_color="grey")
-        VARS["move"][1] = event[slice(2)]
-        VARS["window"][event](button_color="blue")
-
-    if type(event) == int:
-        if VARS["move"][2] is not None:
-            VARS["window"][VARS["move"][2]](button_color="grey")
-        VARS["move"][2] = event
-        VARS["window"][event](button_color="blue")
-
-    if check_move_complete(VARS["move"]):
-        VARS["window"]["Play the move"](disabled=False)
-
-    if event == "Play the move":
-        VARS["game"].play(VARS["active_player"], *VARS["move"])
-        VARS["window"][(*VARS["move"][0], 0)](disabled=True)
-        VARS["fig_agg"].get_tk_widget().forget()
-        VARS["fig_plt"] = generate_figure(VARS["game"].table)
-        VARS["fig_agg"] = draw_figure(VARS["window"]["board"].TKCanvas, VARS["fig_plt"])
-        VARS["active_player"] = (
-            VARS["player2"]
-            if VARS["active_player"] == VARS["player1"]
-            else VARS["player1"]
+layout = [
+    [sg.Text("Set up the game: ")],
+    [
+        sg.Text("Player 1"),
+        sg.Combo(player_type, key="P1", readonly=True, enable_events=True),
+        sg.Input(key="P1 name", default_text=None, visible=False),
+        sg.Combo(AI_level, default_value="Easy", key="P1 level", visible=False),
+    ],
+    [
+        sg.Text("Player 2"),
+        sg.Combo(player_type, key="P2", readonly=True, enable_events=True),
+        sg.Input(key="P2 name", default_text=None, visible=False),
+        sg.Combo(AI_level, default_value="Easy", key="P2 level", visible=False),
+    ],
+    [
+        sg.Column(
+            [
+                [
+                    sg.Text("Number of game played"),
+                    sg.Input(default_text="10", key="NbGames"),
+                ]
+            ],
+            key="AIvAI",
+            visible=False,
         )
-        VARS["move"], VARS["window"] = reset_move(VARS["move"], VARS["window"])
-        VARS["game"].check_winner()
-        disable_marbles_buttons(VARS["window"], VARS["game"].table)
-        if VARS["game"].winner:
-            winner = VARS["game"].winner
-            VARS = setup_interface(setup_game())
-            import ipdb
+    ],
+    [
+        sg.Column(
+            [[sg.Button("Quit"), sg.Button("Play", disabled=True)]],
+            justification="right",
+        )
+    ],
+]
 
-            ipdb.set_trace()
-            sg.Popup(f"Player {winner} has won")
+window = sg.Window("Pentago Launcher", layout)
 
-VARS["window"].close()
+while True:
+    event, value = window.read()
+    if event == sg.WIN_CLOSED or event == "Quit":
+        break
+    if event == "P1":
+        if value["P1"] == "Player":
+            window["P1 name"](visible=True)
+            window["P1 level"](visible=False)
+        else:
+            window["P1 name"](visible=False)
+            window["P1 level"](visible=True)
+        if value["P1"] == "AI" and value["P2"] == "AI":
+            window["AIvAI"](visible=True)
+        else:
+            window["AIvAI"](visible=False)
 
-# random_play_wins = []
-# smart_play_wins = []
+    if event == "P2":
+        if value["P2"] == "Player":
+            window["P2 name"](visible=True)
+            window["P2 level"](visible=False)
+        else:
+            window["P2 name"](visible=False)
+            window["P2 level"](visible=True)
+        if value["P1"] == "AI" and value["P2"] == "AI":
+            window["AIvAI"](visible=True)
+        else:
+            window["AIvAI"](visible=False)
 
-# for i in tqdm(range(70)):
+    if value["P1"] != "" and value["P2"] != "":
+        window["Play"](disabled=False)
 
-#     player1, player2 = player(1), player(2)
-#     game = pentago(plot_grid=False)
-#     while not game.winner:
-#         player1.random_play(game)
-#         if not game.winner:
-#             player2.smart_play(game)
+    if event == "Play":
+        if value["P1"] == "Player":
+            p1 = {
+                "player1_type": value["P1"],
+                "player1_name": value["P1 name"]
+                if value["P1 name"] != ""
+                else "Player 1",
+            }
+        else:
+            p1 = {
+                "player1_type": value["P1"],
+                "player1_lvl": value["P1 level"],
+            }
 
-#     if game.winner == 1:
-#         random_play_wins.append(1)
-#         smart_play_wins.append(0)
-#     elif game.winner == 2:
-#         random_play_wins.append(0)
-#         smart_play_wins.append(1)
-#     else:
-#         random_play_wins.append(0)
-#         smart_play_wins.append(0)
+        if value["P2"] == "Player":
+            p2 = {
+                "player2_type": value["P2"],
+                "player2_name": value["P2 name"]
+                if value["P2 name"] != ""
+                else "Player 2",
+            }
+        else:
+            p2 = {
+                "player2_type": value["P2"],
+                "player2_lvl": value["P2 level"],
+            }
 
+        game_interface(
+            **p1,
+            **p2,
+            nb_games=value["NbGames"],
+        )
 
-# random_play_wins = np.array(random_play_wins)
-# smart_play_wins = np.array(smart_play_wins)
-
-# plt.figure(figsize=(10, 5))
-# plt.plot(random_play_wins.cumsum())
-# plt.plot(smart_play_wins.cumsum())
-# plt.legend(['random play', 'smart play'])
-# plt.show()
+window.close()

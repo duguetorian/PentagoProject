@@ -2,7 +2,10 @@ import numpy as np
 
 
 class player:
-    def __init__(self, number):
+    def __init__(self, number, name="", type="Player", lvl=None):
+        self.name = name
+        self.type = type
+        self.lvl = lvl
         if number == 1 or number == 2:
             self.number = number
         else:
