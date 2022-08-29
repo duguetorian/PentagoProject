@@ -1,12 +1,16 @@
 import PySimpleGUI as sg
 from game_interface import game_interface
 
+# Set the color theme
 sg.theme("black")
 
+# Types choices for players
 player_type = ["Player", "AI"]
 
+# Level choices for AIs
 AI_level = ["Easy", "Hard"]
 
+# Layout of the selection menu
 layout = [
     [sg.Text("Set up the game: ")],
     [
@@ -41,12 +45,17 @@ layout = [
     ],
 ]
 
+# Creation of the window
 window = sg.Window("Pentago Launcher", layout)
 
 while True:
     event, value = window.read()
+
+    # Close the window when quitted
     if event == sg.WIN_CLOSED or event == "Quit":
         break
+
+    # Selection of player 1 type
     if event == "P1":
         if value["P1"] == "Player":
             window["P1 name"](visible=True)
@@ -59,6 +68,7 @@ while True:
         else:
             window["AIvAI"](visible=False)
 
+    # Selection of player 2 type
     if event == "P2":
         if value["P2"] == "Player":
             window["P2 name"](visible=True)
@@ -71,9 +81,13 @@ while True:
         else:
             window["AIvAI"](visible=False)
 
+    # Allow the game to be started if the two players are configurated
     if value["P1"] != "" and value["P2"] != "":
         window["Play"](disabled=False)
+    else:
+        window["Play"](disabled=True)
 
+    # Start the game
     if event == "Play":
         if value["P1"] == "Player":
             p1 = {
@@ -100,7 +114,7 @@ while True:
                 "player2_type": value["P2"],
                 "player2_lvl": value["P2 level"],
             }
-
+        # Launch the game
         game_interface(
             **p1,
             **p2,
