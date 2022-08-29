@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 
 
 def matrix_conversion(matrix):
+    """
+    Convert the (2, 2, 3, 3) game table in a (6, 6) matrix easier to use for the interface
+    """
     table = np.zeros(36).reshape(6, 6)
     for row in range(6):
         for col in range(6):
@@ -20,6 +23,9 @@ def matrix_conversion(matrix):
 
 
 def conversion_to_coordinates(matrix):
+    """
+    Convert the (6, 6) board matrix in 3 lists of coordinates in order to plot them using matplotlib
+    """
     table = matrix_conversion(matrix)
     X0 = []
     X1 = []
@@ -42,9 +48,13 @@ def conversion_to_coordinates(matrix):
 
 
 def generate_figure(matrix):
+    """
+    Generate the figure of the board using the coordinates
+    """
     X0, Y0, X1, Y1, X2, Y2 = conversion_to_coordinates(matrix)
     fig = plt.figure(figsize=(6, 6))
     fig.set_size_inches(2, 2)
+    # Set the background color
     fig.set_facecolor("darkred")
 
     ax = fig.add_subplot(111)
@@ -52,6 +62,7 @@ def generate_figure(matrix):
     ax.scatter(X1, Y1, s=60, color="white", marker="o")
     ax.scatter(X2, Y2, s=80, color="black", marker="o")
     ax.invert_yaxis()
+    # Hide the axis
     ax.set_axis_off()
     ax.vlines(2.5, 0, 5, colors="black")
     ax.hlines(2.5, 0, 5, colors="black")

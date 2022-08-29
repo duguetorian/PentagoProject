@@ -20,31 +20,39 @@ class game_interface:
         player2_lvl=None,
         nb_games=None,
     ):
+        # List of all marbles and boards selection used to discriminate events
         self.marbles_selection = [(row, col, 0) for row in range(6) for col in range(6)]
         self.board_selection = [(row, col, 1) for row in range(2) for col in range(2)]
 
+        # Set up the players
         self.player1 = player(1, player1_name, player1_type, player1_lvl)
         self.player2 = player(2, player2_name, player2_type, player2_lvl)
+        # Get the number of games to be played when it is AI vs AI
         self.nb_games = int(nb_games)
 
+        # Set up the game and initialize the first move
         self.game = pentago(plot_grid=False)
         self.move = [None, None, None]
         self.active_player = self.player1
 
+        # Set up the interface
         self.window = None
         self.fig_plt = None
         self.fig_agg = None
 
+        # Choose which type of game to be played
         if self.player1.type == self.player2.type == "AI":
             self.start_games()
         else:
             self.start_game()
 
+    # Reset the game but notthe interface
     def reset_game(self):
         self.player1 = player(1, self.player1.name, self.player1.type, self.player1.lvl)
         self.player2 = player(2, self.player2.name, self.player2.type, self.player2.lvl)
         self.game = pentago(plot_grid=False)
 
+    # Generate the layout of the game
     def generate_layout(self):
         marbles = [[sg.Text("Place your marble")]]
 
@@ -102,6 +110,7 @@ class game_interface:
             ],
         ]
 
+    # Draw the board with matplotlib
     def draw_figure(self, canvas_name):
         figure_canvas_agg = FigureCanvasTkAgg(
             self.fig_plt, self.window[canvas_name].TKCanvas
@@ -110,12 +119,14 @@ class game_interface:
         figure_canvas_agg.get_tk_widget().pack(side="top", fill="both", expand=1)
         return figure_canvas_agg
 
+    # Check if the move is complete in order to allow to play it
     def check_move_complete(self):
         for step in self.move:
             if step is None:
                 return False
         return True
 
+    # Reset the move and the interface of the move
     def reset_move(self):
         if self.move[0] is not None:
             self.window[(*self.move[0], 0)](button_color="grey")
@@ -126,6 +137,7 @@ class game_interface:
         self.move = [None, None, None]
         self.window["Play the move"](disabled=True)
 
+    # Disable the buttons of the marbles' slots already taken
     def disable_marbles_buttons(self):
         table = matrix_conversion(self.game.table)
         for i in range(6):
@@ -135,6 +147,7 @@ class game_interface:
                 else:
                     self.window[(i, j, 0)](disabled=False)
 
+    # Update the matplotlib figure with the new datas of the game
     def update_board(self):
         self.fig_agg.get_tk_widget().forget()
         self.fig_plt = generate_figure(self.game.table)
@@ -146,6 +159,7 @@ class game_interface:
         self.game.check_winner()
         self.disable_marbles_buttons()
 
+    # Start the game between players and AIs (only not AI vs AI)
     def start_game(self):
         layout = self.generate_layout()
         self.window = sg.Window("Pentago", layout, finalize=True, resizable=True)
@@ -201,6 +215,7 @@ class game_interface:
 
         self.window.close()
 
+    # Start multiple games in a row of AI vs AI
     def start_games(self):
         layout = [
             [sg.Text(f"Wins repartition for {self.nb_games} games")],
